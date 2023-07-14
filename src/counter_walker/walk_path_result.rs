@@ -11,11 +11,11 @@ pub struct WalkPathResult {
 
 #[allow(dead_code)]
 impl WalkPathResult {
-    fn total_files(&self) -> usize {
+    pub fn total_files(&self) -> usize {
         self.file_count + self.error_file_count + self.empty_file_count
     }
 
-    fn total_entries(&self) -> usize {
+    pub fn total_entries(&self) -> usize {
         self.total_files() + self.folder_count
     }
 

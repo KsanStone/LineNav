@@ -11,6 +11,7 @@ use crate::counter_walker::{ExcludeOptions, walk_path};
 use crate::counter_walker::walk_path_result::WalkPathResult;
 use crate::result_printer::{FinalDisplayOptions, ResultPrinter};
 use crate::result_printer::debug_result_printer::DebugResultPrinter;
+use crate::result_printer::simple_result_printer::SimpleResultPrinter;
 
 #[derive(Debug, Parser)]
 #[command(name = "CMDStore")]
@@ -71,13 +72,20 @@ fn main() {
 
     println!("{args:?} {encoding:?} {include_extensions:?}");
 
-    let printer_impl = DebugResultPrinter {};
-    printer_impl.set_options(&display_options);
+    let mut printer_impl: Box<dyn ResultPrinter> = if display_options.verbose && display_options.simple {
+        println!("simple impl");
+        Box::new(SimpleResultPrinter::new())
+    } else {
+        println!("debug impl");
+        Box::new(DebugResultPrinter {})
+    };
+
+    (&mut *printer_impl).set_options(&display_options);
 
     let mut final_res = WalkPathResult::new();
 
     for path in paths.iter() {
-        let sub_count = walk_path(path, encoding, 0, &printer_impl, &ExcludeOptions { include_extensions: &include_extensions, exclude: &exclude }).expect("Count failed");
+        let sub_count = walk_path(path, encoding, 0, &*printer_impl, &ExcludeOptions { include_extensions: &include_extensions, exclude: &exclude }).expect("Count failed");
         if paths.len() > 1 {
             printer_impl.print_subtotal(sub_count.line_count.clone());
         }

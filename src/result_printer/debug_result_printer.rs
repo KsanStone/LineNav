@@ -6,7 +6,7 @@ use crate::result_printer::{FinalDisplayOptions, PrinterEntry, ResultPrinter};
 pub struct DebugResultPrinter {}
 
 impl ResultPrinter for DebugResultPrinter {
-fn set_options(&self, options: &FinalDisplayOptions) {
+fn set_options(&mut self, options: &FinalDisplayOptions) {
         println!("op set {options:?}");
     }
 

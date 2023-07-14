@@ -1,10 +1,11 @@
 pub mod debug_result_printer;
+pub mod simple_result_printer;
 
 use std::path::Path;
 use encoding_rs::Encoding;
 use crate::counter_walker::walk_path_result::WalkPathResult;
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct FinalDisplayOptions {
     pub show_all: bool,
     pub verbose: bool,
@@ -26,7 +27,7 @@ impl PrinterEntry<'_> {
 }
 
 pub trait ResultPrinter {
-    fn set_options(&self, options: &FinalDisplayOptions);
+    fn set_options(&mut self, options: &FinalDisplayOptions);
 
     fn print_result(&self, total: WalkPathResult);
     fn print_subtotal(&self, total: i64);

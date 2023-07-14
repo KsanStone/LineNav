@@ -18,7 +18,7 @@ pub fn walk_path(
     path: &Path,
     encoding: Option<&'static Encoding>,
     depth: i32,
-    printer: &impl ResultPrinter,
+    printer: &(impl ResultPrinter + ?Sized),
     exclude_options: &ExcludeOptions,
 ) -> Result<WalkPathResult, Error> {
     let mut walk_result = WalkPathResult::new();

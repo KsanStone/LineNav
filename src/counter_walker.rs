@@ -7,7 +7,7 @@ use encoding_rs::Encoding;
 use walkdir::WalkDir;
 use walk_path_result::WalkPathResult;
 use crate::line_counter::{count_lines, detect_encoding};
-use crate::result_printer::ResultPrinter;
+use crate::result_printer::{PrinterEntry, ResultPrinter};
 
 pub struct ExcludeOptions<'a> {
     pub include_extensions: &'a HashSet<String>,
@@ -29,29 +29,32 @@ pub fn walk_path(
     let entries = WalkDir::new(path).min_depth(1).max_depth(1).into_iter().count();
 
     if depth == 0 {
-        printer.print_header(path.to_str().unwrap(), entries);
+        printer.print_header(path, entries);
     } else {
-        printer.print_folder(&path.file_name().unwrap().to_os_string().into_string().unwrap(), entries, depth + 1);
+        printer.print_folder(&PrinterEntry::from_path(path), entries, depth - 1);
     }
 
     for entry in WalkDir::new(path).min_depth(1).max_depth(1) {
         match entry {
             Ok(dir_entry) => {
                 let entry_path = dir_entry.path();
-                let file_name = entry_path.file_name().unwrap().to_os_string().into_string().unwrap();
                 let file_ext = entry_path.extension();
+                let entry = PrinterEntry { name: entry_path.file_name().unwrap().to_os_string().into_string().unwrap(), path: &entry_path };
 
-                if (skip_name_check || !exclude_options.exclude.contains(&file_name))
+                if (skip_name_check || !exclude_options.exclude.contains(&*entry.name))
                     && (file_ext.is_none()
                     || skip_ext_check
                     || exclude_options.include_extensions.contains(&*file_ext.unwrap().to_os_string().into_string().unwrap()))
                 {
                     if dir_entry.file_type().is_file() {
+                        let mut confidence = -1f32;
                         let used_encoding: &'static Encoding = match encoding {
                             None => {
                                 let detected = detect_encoding(entry_path);
                                 if detected.is_err() { return Err(detected.err().unwrap()); }
-                                detected.unwrap()
+                                let detected_encoding = detected.unwrap();
+                                confidence = detected_encoding.confidence;
+                                detected_encoding.encoding
                             }
                             Some(e) => e
                         };
@@ -59,15 +62,15 @@ pub fn walk_path(
                             Ok(lines) => {
                                 walk_result.line_count += lines as i64;
                                 if lines == 0 {
-                                    printer.print_empty_file(&file_name, -1, used_encoding, depth);
+                                    printer.print_empty_file(&entry, -1, used_encoding, depth, confidence);
                                     walk_result.empty_file_count += 1;
                                 } else {
-                                    printer.print_file(&file_name, lines as i64, -1, used_encoding, depth);
+                                    printer.print_file(&entry, lines as i64, -1, used_encoding, depth, confidence);
                                     walk_result.file_count += 1;
                                 }
                             }
                             Err(_) => {
-                                printer.print_error_file(&file_name, -1, used_encoding, depth);
+                                printer.print_error_file(&entry, -1, used_encoding, depth, confidence);
                                 walk_result.error_file_count += 1;
                             }
                         }
@@ -77,7 +80,7 @@ pub fn walk_path(
                                 printer.print_folder_total(sub_res.line_count, depth + 1);
                                 walk_result += sub_res;
                             }
-                            Err(err) =>  return Err(err)
+                            Err(err) => return Err(err)
                         }
                     }
                 }

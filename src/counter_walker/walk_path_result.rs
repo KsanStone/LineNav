@@ -9,6 +9,7 @@ pub struct WalkPathResult {
     pub error_file_count: usize,
 }
 
+#[allow(dead_code)]
 impl WalkPathResult {
     fn total_files(&self) -> usize {
         self.file_count + self.error_file_count + self.empty_file_count

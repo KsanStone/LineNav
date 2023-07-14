@@ -1,7 +1,8 @@
-use std::fs::File;
-use std::io::{BufRead, BufReader, Error};
+use std::fs::{File, OpenOptions};
+use std::io::{BufRead, BufReader, Error, Read};
 use std::path::{Path};
-use encoding_rs::Encoding;
+use chardet::detect;
+use encoding_rs::{Encoding, UTF_8};
 use encoding_rs_io::DecodeReaderBytesBuilder;
 
 pub fn count_lines(file: &Path, encoding: &'static Encoding) -> Result<usize, Error> {
@@ -25,7 +26,26 @@ pub fn count_lines(file: &Path, encoding: &'static Encoding) -> Result<usize, Er
     }
 }
 
-pub fn detect_encoding(_file: &Path) -> Result<&'static Encoding, Error> {
- todo!()
+pub struct DetectedEncoding {
+    pub encoding: &'static Encoding,
+    pub confidence: f32,
+}
+
+pub fn detect_encoding(file: &Path) -> Result<DetectedEncoding, Error> {
+    // open text file
+    match OpenOptions::new().read(true).open(file) {
+        Ok(fh) => {
+            let mut reader: Vec<u8> = Vec::new();
+            let mut chunk = fh.take(8192);
+            let read_result = chunk.read_to_end(&mut reader);
+            if read_result.is_err() {
+                return Err(read_result.unwrap_err())
+            }
+
+            let result = detect(&reader);
+            Ok(DetectedEncoding { encoding: Encoding::for_label(result.0.as_bytes()).unwrap_or(UTF_8), confidence: result.1 })
+        }
+        Err(err) => Err(err)
+    }
 }
 

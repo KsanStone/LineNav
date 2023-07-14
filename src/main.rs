@@ -77,12 +77,12 @@ fn main() {
     let mut final_res = WalkPathResult::new();
 
     for path in paths.iter() {
-        let sub_count = walk_path(path, encoding, 0, &printer_impl, &ExcludeOptions { include_extensions: &include_extensions, exclude: &exclude }).expect("BRUUUH");
+        let sub_count = walk_path(path, encoding, 0, &printer_impl, &ExcludeOptions { include_extensions: &include_extensions, exclude: &exclude }).expect("Count failed");
         if paths.len() > 1 {
             printer_impl.print_subtotal(sub_count.line_count.clone());
         }
         final_res += sub_count;
     }
 
-    printer_impl.print_total(final_res);
+    printer_impl.print_result(final_res);
 }

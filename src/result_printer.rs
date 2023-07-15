@@ -1,5 +1,7 @@
 pub mod debug_result_printer;
 pub mod simple_result_printer;
+pub mod noop_result_printer;
+pub mod verbose_result_printer;
 
 use std::path::Path;
 use encoding_rs::Encoding;
@@ -29,7 +31,7 @@ impl PrinterEntry<'_> {
 pub trait ResultPrinter {
     fn set_options(&mut self, options: &FinalDisplayOptions);
 
-    fn print_result(&self, total: WalkPathResult);
+    fn print_result(&self, total: WalkPathResult, time: i64);
     fn print_subtotal(&self, total: i64);
     fn print_folder_total(&self, total: i64, depth: i32);
     fn print_header(&self, path: &Path, num_entries: usize);

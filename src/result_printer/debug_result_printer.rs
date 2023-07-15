@@ -10,7 +10,7 @@ fn set_options(&mut self, options: &FinalDisplayOptions) {
         println!("op set {options:?}");
     }
 
-    fn print_result(&self, total: WalkPathResult) {
+    fn print_result(&self, total: WalkPathResult, _time: i64) {
         println!("total: {total:?}");
     }
 

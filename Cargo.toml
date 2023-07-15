@@ -6,8 +6,10 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+ansi_term = "0.12.1"
 chardet = "0.2.4"
 clap = { version = "4.3.11", features = ["derive"] }
 encoding_rs = "0.8.32"
 encoding_rs_io = "0.1.7"
+num-format = "0.4.4"
 walkdir = "2.3.3"

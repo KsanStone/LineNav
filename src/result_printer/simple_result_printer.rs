@@ -25,20 +25,16 @@ impl ResultPrinter for SimpleResultPrinter {
         self.options = options.clone();
     }
 
-    fn print_result(&self, total: WalkPathResult) {
-        if self.options.verbose {
-            println!("{} file{} {} empty {} invalid", total.total_files(), if total.total_files() == 1 {""} else {"s"}, total.empty_file_count, total.error_file_count);
-        }
-        println!("total {} lines", total.line_count);
+    fn print_result(&self, total: WalkPathResult, _time: i64) {
+        println!("{} file{} {} empty {} invalid", total.total_files(), if total.total_files() == 1 {""} else {"s"}, total.empty_file_count, total.error_file_count);
+        println!("{} lines", total.line_count);
     }
 
     fn print_subtotal(&self, total: i64) {
         println!(": {} lines", total);
     }
 
-    fn print_folder_total(&self, total: i64, _depth: i32) {
-        println!(": {} lines",  total);
-    }
+    fn print_folder_total(&self, _total: i64, _depth: i32) {}
 
     fn print_header(&self, path: &Path, num_entries: usize) {
         println!("{} :: {num_entries}", path.display());

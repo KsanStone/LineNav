@@ -11,7 +11,9 @@ use crate::counter_walker::{ExcludeOptions, walk_path};
 use crate::counter_walker::walk_path_result::WalkPathResult;
 use crate::result_printer::{FinalDisplayOptions, ResultPrinter};
 use crate::result_printer::debug_result_printer::DebugResultPrinter;
+use crate::result_printer::noop_result_printer::NoopResultPrinter;
 use crate::result_printer::simple_result_printer::SimpleResultPrinter;
+use crate::result_printer::verbose_result_printer::VerboseResultPrinter;
 
 #[derive(Debug, Parser)]
 #[command(name = "CMDStore")]
@@ -25,6 +27,8 @@ struct LineNavArgs {
     all_files: bool,
     #[clap(long, short, action)]
     simple: bool,
+    #[clap(long, short, action)]
+    debug: bool,
     #[clap(long, short, default_value = "UTF-8")]
     encoding: String,
     #[clap(long, short = 'f', required = false)]
@@ -73,11 +77,13 @@ fn main() {
     println!("{args:?} {encoding:?} {include_extensions:?}");
 
     let mut printer_impl: Box<dyn ResultPrinter> = if display_options.verbose && display_options.simple {
-        println!("simple impl");
         Box::new(SimpleResultPrinter::new())
-    } else {
-        println!("debug impl");
+    } else if display_options.verbose {
+        Box::new(VerboseResultPrinter::new())
+    } else if args.debug {
         Box::new(DebugResultPrinter {})
+    } else {
+        Box::new(NoopResultPrinter {})
     };
 
     (&mut *printer_impl).set_options(&display_options);
@@ -92,5 +98,5 @@ fn main() {
         final_res += sub_count;
     }
 
-    printer_impl.print_result(final_res);
+    printer_impl.print_result(final_res, -1i64);
 }

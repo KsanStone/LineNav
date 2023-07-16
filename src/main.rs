@@ -7,7 +7,7 @@ use std::collections::HashSet;
 use std::path::PathBuf;
 use clap::{Parser};
 use encoding_rs::Encoding;
-use crate::counter_walker::{ExcludeOptions, walk_path};
+use crate::counter_walker::{ExcludeOptions, simple_walk_path, walk_path};
 use crate::counter_walker::walk_path_result::WalkPathResult;
 use crate::result_printer::{FinalDisplayOptions, ResultPrinter};
 use crate::result_printer::debug_result_printer::DebugResultPrinter;
@@ -91,7 +91,12 @@ fn main() {
     let mut final_res = WalkPathResult::new();
 
     for path in paths.iter() {
-        let sub_count = walk_path(path, encoding, 0, &*printer_impl, &ExcludeOptions { include_extensions: &include_extensions, exclude: &exclude }).expect("Count failed");
+        let sub_count = if printer_impl.requires_advanced_walker() {
+            walk_path(path, encoding, 0, &*printer_impl, &ExcludeOptions { include_extensions: &include_extensions, exclude: &exclude }).expect("Count failed")
+        } else {
+            simple_walk_path(path, encoding, &*printer_impl, &ExcludeOptions { include_extensions: &include_extensions, exclude: &exclude }).expect("Count failed")
+        };
+
         if paths.len() > 1 {
             printer_impl.print_subtotal(sub_count.line_count.clone());
         }

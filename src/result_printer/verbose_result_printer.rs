@@ -76,4 +76,8 @@ impl ResultPrinter for VerboseResultPrinter {
             println!("{}{} :: {}", pad_ended(depth, &"├".to_string()), Green.paint(&entry.name), Red.paint("ERROR"));
         }
     }
+
+    fn requires_advanced_walker(&self) -> bool {
+        return true;
+    }
 }

@@ -41,4 +41,8 @@ fn set_options(&mut self, options: &FinalDisplayOptions) {
     fn print_error_file(&self, entry: &PrinterEntry, _process_time: i64, encoding: &'static Encoding, depth: i32, confidence: f32) {
         println!("{depth} error: {} {encoding:?}[{confidence}]", entry.name);
     }
+
+    fn requires_advanced_walker(&self) -> bool {
+        return true;
+    }
 }

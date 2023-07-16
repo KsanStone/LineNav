@@ -40,4 +40,6 @@ pub trait ResultPrinter {
     fn print_file(&self, entry: &PrinterEntry, lines: i64, process_time: i64, encoding: &'static Encoding, depth: i32, confidence: f32);
     fn print_empty_file(&self, entry: &PrinterEntry, process_time: i64, encoding: &'static Encoding, depth: i32, confidence: f32);
     fn print_error_file(&self, entry: &PrinterEntry, process_time: i64, encoding: &'static Encoding, depth: i32, confidence: f32);
+
+    fn requires_advanced_walker(&self) -> bool;
 }

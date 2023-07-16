@@ -29,4 +29,8 @@ impl ResultPrinter for NoopResultPrinter {
     fn print_empty_file(&self, _entry: &PrinterEntry, _process_time: i64, _encoding: &'static Encoding, _depth: i32, _confidence: f32) {}
 
     fn print_error_file(&self, _entry: &PrinterEntry, _process_time: i64, _encoding: &'static Encoding, _depth: i32, _confidence: f32) {}
+
+    fn requires_advanced_walker(&self) -> bool {
+        return false;
+    }
 }

@@ -67,4 +67,8 @@ impl ResultPrinter for SimpleResultPrinter {
             println!("{} :: ERROR", entry.path.display())
         }
     }
+
+    fn requires_advanced_walker(&self) -> bool {
+        return false;
+    }
 }

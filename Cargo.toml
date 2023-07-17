@@ -3,6 +3,10 @@ name = "line_counter"
 version = "0.1.0"
 edition = "2021"
 
+[[bin]]
+name = "lnav"  # Modify this line with your desired binary name
+path = "src/main.rs"     # Path to the binary's main source file
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]

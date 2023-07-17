@@ -1,12 +1,10 @@
-mod line_counter;
-mod counter_walker;
-mod result_printer;
-
 use std::{fs, process};
 use std::collections::HashSet;
 use std::path::PathBuf;
-use clap::{Parser};
+
+use clap::Parser;
 use encoding_rs::Encoding;
+
 use crate::counter_walker::{ExcludeOptions, simple_walk_path, walk_path};
 use crate::counter_walker::walk_path_result::WalkPathResult;
 use crate::result_printer::{FinalDisplayOptions, ResultPrinter};
@@ -14,6 +12,10 @@ use crate::result_printer::debug_result_printer::DebugResultPrinter;
 use crate::result_printer::noop_result_printer::NoopResultPrinter;
 use crate::result_printer::simple_result_printer::SimpleResultPrinter;
 use crate::result_printer::verbose_result_printer::VerboseResultPrinter;
+
+mod line_counter;
+mod counter_walker;
+mod result_printer;
 
 #[derive(Debug, Parser)]
 #[command(name = "CMDStore")]
@@ -105,3 +107,9 @@ fn main() {
 
     printer_impl.print_result(final_res, -1i64);
 }
+
+
+// fn main() {
+//     let a = count_lines(PathBuf::from(r"C:\Users\filip\OneDrive\Dokumenty\CodingProjects\Rust\LineCounter\test-data\d1\d2\selector.cpp").as_path(), UTF_8);
+//     println!("{a:?}");
+// }

@@ -83,8 +83,6 @@ fn main() {
         simple: args.simple,
     };
 
-    println!("{args:?} {encoding:?} {include_extensions:?}");
-
     let mut printer_impl: Box<dyn ResultPrinter> = if display_options.verbose && display_options.simple {
         Box::new(SimpleResultPrinter::new())
     } else if display_options.verbose {

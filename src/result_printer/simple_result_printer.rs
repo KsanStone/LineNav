@@ -47,24 +47,20 @@ impl ResultPrinter for SimpleResultPrinter {
 
     fn print_file(&self, entry: &PrinterEntry, lines: i64, _process_time: i64, encoding: &'static Encoding, _depth: i32, confidence: f32) {
         if self.options.very_verbose {
-            println!("{} :: {lines} [{}{}]", entry.path.display(), encoding.name(), if confidence == -1f32 {"".to_string()} else { format!("{:.2}%", confidence * 100f32) })
+            println!("{} :: {lines} [{}{}]", entry.path.display(), encoding.name(), if confidence == -1f32 {"".to_string()} else { format!(" {:.2}%", confidence * 100f32) })
         } else {
             println!("{} :: {lines}", entry.path.display())
         }
     }
 
-    fn print_empty_file(&self, entry: &PrinterEntry, _process_time: i64, encoding: &'static Encoding, _depth: i32, confidence: f32) {
-        if self.options.very_verbose && self.options.show_all {
-            println!("{} :: EMPTY [{}{}]", entry.path.display(), encoding.name(), if confidence == -1f32 {"".to_string()} else { format!("{:.2}%", confidence * 100f32) })
-        } else if self.options.show_all {
+    fn print_empty_file(&self, entry: &PrinterEntry, _process_time: i64, _encoding: &'static Encoding, _depth: i32, _confidence: f32) {
+        if self.options.show_all {
             println!("{} :: EMPTY", entry.path.display())
         }
     }
 
-    fn print_error_file(&self, entry: &PrinterEntry, _process_time: i64, encoding: &'static Encoding, _depth: i32, confidence: f32) {
-        if self.options.very_verbose && self.options.show_all {
-            println!("{} :: ERROR [{}{}]", entry.path.display(), encoding.name(), if confidence == -1f32 {"".to_string()} else { format!("{:.2}%", confidence * 100f32) })
-        } else if self.options.show_all {
+    fn print_error_file(&self, entry: &PrinterEntry, _process_time: i64, _encoding: &'static Encoding, _depth: i32, _confidence: f32) {
+        if self.options.show_all {
             println!("{} :: ERROR", entry.path.display())
         }
     }

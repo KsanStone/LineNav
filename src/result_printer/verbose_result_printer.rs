@@ -59,7 +59,7 @@ impl ResultPrinter for VerboseResultPrinter {
 
     fn print_file(&self, entry: &PrinterEntry, lines: i64, _process_time: i64, encoding: &'static Encoding, depth: i32, confidence: f32) {
         let verbose_info = if self.options.very_verbose {
-            format!(" [{}{}]", encoding.name(), if confidence == -1f32 { "".to_string() } else { format!("{:.2}%", confidence * 100f32) })
+            format!(" [{}{}]", encoding.name(), if confidence == -1f32 { "".to_string() } else { format!(" {:.2}%", confidence * 100f32) })
         } else {
             "".to_string()
         };

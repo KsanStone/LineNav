@@ -110,9 +110,3 @@ fn main() {
     let duration = start.elapsed();
     printer_impl.print_result(final_res, &duration);
 }
-
-
-// fn main() {
-//     let a = count_lines(PathBuf::from(r"C:\Users\filip\OneDrive\Dokumenty\CodingProjects\Rust\LineCounter\test-data\d1\d2\selector.cpp").as_path(), UTF_8);
-//     println!("{a:?}");
-// }

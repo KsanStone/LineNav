@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use std::path::PathBuf;
 use std::time::Instant;
 
-use clap::Parser;
+use clap::{ArgAction, Parser};
 use encoding_rs::Encoding;
 
 use crate::counter_walker::{ExcludeOptions, simple_walk_path, walk_path};
@@ -20,34 +20,40 @@ mod result_printer;
 
 #[derive(Debug, Parser)]
 #[command(name = "CMDStore")]
-/// Key-value based storage utility for the commandline
+/// Project line counter utility
 struct LineNavArgs {
-    #[clap(long, short, action)]
-    verbose: bool,
-    #[clap(long = "vv", action)]
+    #[arg(long, short, action = ArgAction::Count)]
+    /// Shows a tree with all the files
+    /// Add a second flag to enable --very-verbose output
+    verbose: u8,
+    #[clap(long, action)]
+    /// Shows the encoding
     very_verbose: bool,
     #[clap(long, short, action)]
+    /// Shows empty and invalid files
     all_files: bool,
     #[clap(long, short, action)]
+    /// Simplified console output
     simple: bool,
     #[clap(long, short, action)]
     debug: bool,
     #[clap(long, short, default_value = "UTF-8")]
+    /// Encoding to read files with. Set "auto" to automatically detect
     encoding: String,
-    #[clap(long, short = 'f', required = false)]
-    file_extensions: Option<String>,
+    #[clap(long, short = 'f', required = false, value_delimiter = ',')]
+    /// File extensions to count through
+    file_extensions: Vec<String>,
     #[clap(num_args = 0.., default_values = ["."])]
+    /// Folders to count
     paths: Vec<String>,
     #[clap(long, short = 'x', num_args = 1.., required = false)]
+    /// Excluded file names
     exclude: Vec<String>,
 }
 
 fn main() {
     let args = LineNavArgs::parse();
-    let include_extensions: HashSet<String> = match args.file_extensions {
-        None => HashSet::new(),
-        Some(ref extensions) => extensions.split(',').map(str::to_string).collect()
-    };
+    let include_extensions: HashSet<String> = args.file_extensions.iter().map(|x| x.to_owned()).collect();
     let exclude: HashSet<String> = args.exclude.iter().map(|x| x.to_owned()).collect();
     let paths: Vec<PathBuf> = args.paths.iter().map(fs::canonicalize).map(|x| {
         match x {
@@ -72,8 +78,8 @@ fn main() {
 
     let display_options = FinalDisplayOptions {
         show_all: args.all_files,
-        verbose: args.verbose,
-        very_verbose: args.very_verbose,
+        verbose: args.verbose > 0,
+        very_verbose: args.very_verbose || args.verbose > 1,
         simple: args.simple,
     };
 

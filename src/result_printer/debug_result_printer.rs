@@ -1,4 +1,5 @@
 use std::path::Path;
+use std::time::Duration;
 use encoding_rs::Encoding;
 use crate::counter_walker::walk_path_result::WalkPathResult;
 use crate::result_printer::{FinalDisplayOptions, PrinterEntry, ResultPrinter};
@@ -10,8 +11,8 @@ fn set_options(&mut self, options: &FinalDisplayOptions) {
         println!("op set {options:?}");
     }
 
-    fn print_result(&self, total: WalkPathResult, _time: i64) {
-        println!("total: {total:?}");
+    fn print_result(&self, total: WalkPathResult, time: &Duration) {
+        println!("total: {total:?}, {time:?}");
     }
 
     fn print_subtotal(&self, total: i64) {

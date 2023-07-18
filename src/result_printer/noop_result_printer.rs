@@ -1,4 +1,5 @@
 use std::path::Path;
+use std::time::Duration;
 use encoding_rs::Encoding;
 use crate::counter_walker::walk_path_result::WalkPathResult;
 use crate::result_printer::{FinalDisplayOptions, PrinterEntry, ResultPrinter};
@@ -8,7 +9,7 @@ pub struct NoopResultPrinter {}
 impl ResultPrinter for NoopResultPrinter {
     fn set_options(&mut self, _options: &FinalDisplayOptions) { }
 
-    fn print_result(&self, total: WalkPathResult, _time: i64) {
+    fn print_result(&self, total: WalkPathResult, _time: &Duration) {
         println!("{} lines", total.line_count);
     }
 

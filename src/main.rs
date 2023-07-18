@@ -1,6 +1,7 @@
 use std::{fs, process};
 use std::collections::HashSet;
 use std::path::PathBuf;
+use std::time::Instant;
 
 use clap::Parser;
 use encoding_rs::Encoding;
@@ -91,6 +92,7 @@ fn main() {
     (&mut *printer_impl).set_options(&display_options);
 
     let mut final_res = WalkPathResult::new();
+    let start = Instant::now();
 
     for path in paths.iter() {
         let sub_count = if printer_impl.requires_advanced_walker() {
@@ -105,7 +107,8 @@ fn main() {
         final_res += sub_count;
     }
 
-    printer_impl.print_result(final_res, -1i64);
+    let duration = start.elapsed();
+    printer_impl.print_result(final_res, &duration);
 }
 
 

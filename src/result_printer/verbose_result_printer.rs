@@ -1,5 +1,6 @@
 use std::cmp::max;
 use std::path::Path;
+use std::time::Duration;
 use ansi_term::ANSIGenericString;
 use ansi_term::Color::{Blue, Green, Purple, Red, White, Yellow};
 use encoding_rs::Encoding;
@@ -33,10 +34,10 @@ impl ResultPrinter for VerboseResultPrinter {
         self.options = options.clone();
     }
 
-    fn print_result(&self, total: WalkPathResult, _time: i64) {
+    fn print_result(&self, total: WalkPathResult, time: &Duration) {
         let empty_file_str = White.dimmed().paint(format!("{} empty", total.empty_file_count));
         let error_file_str = if total.error_file_count == 0 { White.dimmed() } else { Red.normal() }.paint(format!("{} invalid", total.error_file_count));
-        println!("{} file{} {} {}", total.total_files(), if total.total_files() == 1 { "" } else { "s" }, empty_file_str, error_file_str);
+        println!("{} file{} {} {} {} folder{} {:?}", total.total_files(), if total.total_files() == 1 { "" } else { "s" }, empty_file_str, error_file_str, total.folder_count, if total.folder_count == 1 { "" } else { "s" }, time);
         println!("{} lines", Blue.paint(total.line_count.to_formatted_string(&Locale::en_GB)));
     }
 

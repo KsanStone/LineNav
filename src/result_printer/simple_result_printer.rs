@@ -1,4 +1,5 @@
 use std::path::Path;
+use std::time::Duration;
 use encoding_rs::Encoding;
 use crate::counter_walker::walk_path_result::WalkPathResult;
 use crate::result_printer::{FinalDisplayOptions, PrinterEntry, ResultPrinter};
@@ -25,8 +26,8 @@ impl ResultPrinter for SimpleResultPrinter {
         self.options = options.clone();
     }
 
-    fn print_result(&self, total: WalkPathResult, _time: i64) {
-        println!("{} file{} {} empty {} invalid", total.total_files(), if total.total_files() == 1 {""} else {"s"}, total.empty_file_count, total.error_file_count);
+    fn print_result(&self, total: WalkPathResult, time: &Duration) {
+        println!("{} file{} {} empty {} invalid {} folder{} {:?}", total.total_files(), if total.total_files() == 1 {""} else {"s"}, total.empty_file_count, total.error_file_count, total.folder_count, if total.folder_count == 1 { "" } else { "s" }, time);
         println!("{} lines", total.line_count);
     }
 

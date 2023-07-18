@@ -4,6 +4,7 @@ pub mod noop_result_printer;
 pub mod verbose_result_printer;
 
 use std::path::Path;
+use std::time::Duration;
 use encoding_rs::Encoding;
 use crate::counter_walker::walk_path_result::WalkPathResult;
 
@@ -31,7 +32,7 @@ impl PrinterEntry<'_> {
 pub trait ResultPrinter {
     fn set_options(&mut self, options: &FinalDisplayOptions);
 
-    fn print_result(&self, total: WalkPathResult, time: i64);
+    fn print_result(&self, total: WalkPathResult, time: &Duration);
     fn print_subtotal(&self, total: i64);
     fn print_folder_total(&self, total: i64, depth: i32);
     fn print_header(&self, path: &Path, num_entries: usize);

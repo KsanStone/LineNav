@@ -45,7 +45,7 @@ fn handle_file_entry(
             };
             Ok(())
         }
-        Err(err) => {
+        Err(_) => {
             printer.print_error_file(&entry, -1, used_encoding, depth, confidence);
             walk_result.error_file_count += 1;
             Ok(())

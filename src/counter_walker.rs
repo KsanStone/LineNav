@@ -152,6 +152,8 @@ pub fn simple_walk_path(
                         ) {
                             return Err(res);
                         }
+                    } else {
+                        walk_result.folder_count += 1;
                     }
                 }
             }

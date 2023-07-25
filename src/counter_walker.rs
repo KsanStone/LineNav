@@ -14,7 +14,7 @@ pub struct ExcludeOptions<'a> {
     pub exclude: &'a HashSet<String>,
 }
 
-fn handle_file_entry(
+pub fn handle_file_entry(
     encoding: Option<&'static Encoding>,
     entry_path: &Path,
     entry: &PrinterEntry,

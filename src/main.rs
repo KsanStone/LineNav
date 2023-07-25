@@ -6,9 +6,9 @@ use std::time::Instant;
 use clap::{ArgAction, Parser};
 use encoding_rs::Encoding;
 
-use crate::counter_walker::{ExcludeOptions, simple_walk_path, walk_path};
+use crate::counter_walker::{ExcludeOptions, handle_file_entry, simple_walk_path, walk_path};
 use crate::counter_walker::walk_path_result::WalkPathResult;
-use crate::result_printer::{FinalDisplayOptions, ResultPrinter};
+use crate::result_printer::{FinalDisplayOptions, PrinterEntry, ResultPrinter};
 use crate::result_printer::debug_result_printer::DebugResultPrinter;
 use crate::result_printer::noop_result_printer::NoopResultPrinter;
 use crate::result_printer::simple_result_printer::SimpleResultPrinter;
@@ -99,16 +99,30 @@ fn main() {
     let start = Instant::now();
 
     for path in paths.iter() {
-        let sub_count = if printer_impl.requires_advanced_walker() {
-            walk_path(path, encoding, 0, &*printer_impl, &ExcludeOptions { include_extensions: &include_extensions, exclude: &exclude }).expect("Count failed")
-        } else {
-            simple_walk_path(path, encoding, &*printer_impl, &ExcludeOptions { include_extensions: &include_extensions, exclude: &exclude }).expect("Count failed")
-        };
-
-        if paths.len() > 1 {
-            printer_impl.print_subtotal(sub_count.line_count.clone());
+        if path.is_dir() {
+            let sub_count = if printer_impl.requires_advanced_walker() {
+                walk_path(path, encoding, 0, &*printer_impl, &ExcludeOptions { include_extensions: &include_extensions, exclude: &exclude }).expect("Count failed")
+            } else {
+                simple_walk_path(path, encoding, &*printer_impl, &ExcludeOptions { include_extensions: &include_extensions, exclude: &exclude }).expect("Count failed")
+            };
+            if paths.len() > 1 {
+                printer_impl.print_subtotal(sub_count.line_count.clone());
+            }
+            final_res += sub_count;
+        } else if path.is_file() {
+            let res = &mut WalkPathResult::new();
+            handle_file_entry(
+                encoding,
+                path,
+                &PrinterEntry::from_path(path),
+                0,
+                res,
+                &NoopResultPrinter {}
+            ).expect("Count failed");
+            printer_impl.print_header(path, 1);
+            printer_impl.print_subtotal(res.line_count);
+            final_res += *res;
         }
-        final_res += sub_count;
     }
 
     let duration = start.elapsed();

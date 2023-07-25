@@ -1,6 +1,6 @@
 use std::ops::{Add, AddAssign};
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct WalkPathResult {
     pub line_count: i64,
     pub folder_count: usize,

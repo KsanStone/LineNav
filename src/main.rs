@@ -1,21 +1,22 @@
-use std::{fs, process};
 use std::collections::HashSet;
 use std::path::PathBuf;
 use std::time::Instant;
+use std::{fs, process};
 
 use clap::{ArgAction, Parser};
 use encoding_rs::Encoding;
 
-use crate::counter_walker::{ExcludeOptions, handle_file_entry, simple_walk_path, walk_path};
 use crate::counter_walker::walk_path_result::WalkPathResult;
-use crate::result_printer::{FinalDisplayOptions, PrinterEntry, ResultPrinter};
+use crate::counter_walker::{handle_file_entry, simple_walk_path, walk_path, ExcludeOptions};
+use crate::line_counter::LineCountFormat;
 use crate::result_printer::debug_result_printer::DebugResultPrinter;
 use crate::result_printer::noop_result_printer::NoopResultPrinter;
 use crate::result_printer::simple_result_printer::SimpleResultPrinter;
 use crate::result_printer::verbose_result_printer::VerboseResultPrinter;
+use crate::result_printer::{FinalDisplayOptions, PrinterEntry, ResultPrinter};
 
-mod line_counter;
 mod counter_walker;
+mod line_counter;
 mod result_printer;
 
 #[derive(Debug, Parser)]
@@ -53,17 +54,21 @@ struct LineNavArgs {
 
 fn main() {
     let args = LineNavArgs::parse();
-    let include_extensions: HashSet<String> = args.file_extensions.iter().map(|x| x.to_owned()).collect();
+    let include_extensions: HashSet<String> =
+        args.file_extensions.iter().map(|x| x.to_owned()).collect();
     let exclude: HashSet<String> = args.exclude.iter().map(|x| x.to_owned()).collect();
-    let paths: Vec<PathBuf> = args.paths.iter().map(fs::canonicalize).map(|x| {
-        match x {
+    let paths: Vec<PathBuf> = args
+        .paths
+        .iter()
+        .map(fs::canonicalize)
+        .map(|x| match x {
             Ok(path) => path,
             Err(err) => {
                 eprintln!("Invalid path. {err:?}");
                 process::exit(1);
             }
-        }
-    }).collect();
+        })
+        .collect();
 
     let _ = ansi_term::enable_ansi_support();
 
@@ -83,19 +88,25 @@ fn main() {
         verbose: args.verbose > 0,
         very_verbose: args.very_verbose || args.verbose > 1,
         simple: args.simple,
+        line_count_format: if args.very_verbose || args.verbose > 0 {
+            LineCountFormat::Colour { show_bytes: true }
+        } else {
+            LineCountFormat::Simple { show_bytes: false }
+        },
     };
 
-    let mut printer_impl: Box<dyn ResultPrinter> = if display_options.verbose && display_options.simple {
-        Box::new(SimpleResultPrinter::new())
-    } else if display_options.verbose {
-        Box::new(VerboseResultPrinter::new())
-    } else if args.debug {
-        Box::new(DebugResultPrinter {})
-    } else {
-        Box::new(NoopResultPrinter {})
-    };
+    let mut printer_impl: Box<dyn ResultPrinter> =
+        if display_options.verbose && display_options.simple {
+            Box::new(SimpleResultPrinter::new())
+        } else if display_options.verbose {
+            Box::new(VerboseResultPrinter::new())
+        } else if args.debug {
+            Box::new(DebugResultPrinter {})
+        } else {
+            Box::new(NoopResultPrinter {})
+        };
 
-    (&mut *printer_impl).set_options(&display_options);
+    (*printer_impl).set_options(&display_options);
 
     let mut final_res = WalkPathResult::new();
     let start = Instant::now();
@@ -103,12 +114,31 @@ fn main() {
     for path in paths.iter() {
         if path.is_dir() {
             let sub_count = if printer_impl.requires_advanced_walker() {
-                walk_path(path, encoding, 0, &*printer_impl, &ExcludeOptions { include_extensions: &include_extensions, exclude: &exclude }).expect("Count failed")
+                walk_path(
+                    path,
+                    encoding,
+                    0,
+                    &*printer_impl,
+                    &ExcludeOptions {
+                        include_extensions: &include_extensions,
+                        exclude: &exclude,
+                    },
+                )
+                .expect("Count failed")
             } else {
-                simple_walk_path(path, encoding, &*printer_impl, &ExcludeOptions { include_extensions: &include_extensions, exclude: &exclude }).expect("Count failed")
+                simple_walk_path(
+                    path,
+                    encoding,
+                    &*printer_impl,
+                    &ExcludeOptions {
+                        include_extensions: &include_extensions,
+                        exclude: &exclude,
+                    },
+                )
+                .expect("Count failed")
             };
             if paths.len() > 1 {
-                printer_impl.print_subtotal(sub_count.line_count.clone());
+                printer_impl.print_subtotal(sub_count.line_count);
             }
             final_res += sub_count;
         } else if path.is_file() {
@@ -119,8 +149,9 @@ fn main() {
                 &PrinterEntry::from_path(path),
                 0,
                 res,
-                &NoopResultPrinter {}
-            ).expect("Count failed");
+                &NoopResultPrinter {},
+            )
+            .expect("Count failed");
             printer_impl.print_header(path, 1);
             printer_impl.print_subtotal(res.line_count);
             final_res += *res;

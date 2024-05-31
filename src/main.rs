@@ -67,8 +67,8 @@ fn main() {
                 eprintln!("Invalid path. {err:?}");
                 process::exit(1);
             }
-        }
-    }).collect();
+        })
+        .collect();
 
     #[cfg(target_os = "windows")]
     {

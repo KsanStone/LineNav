@@ -67,10 +67,13 @@ fn main() {
                 eprintln!("Invalid path. {err:?}");
                 process::exit(1);
             }
-        })
-        .collect();
+        }
+    }).collect();
 
-    let _ = ansi_term::enable_ansi_support();
+    #[cfg(target_os = "windows")]
+    {
+        let _ = ansi_term::enable_ansi_support();
+    }
 
     let encoding: Option<&'static Encoding> = if args.encoding == "auto" {
         None

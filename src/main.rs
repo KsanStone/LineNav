@@ -17,6 +17,7 @@ use crate::result_printer::{FinalDisplayOptions, PrinterEntry, ResultPrinter};
 
 mod counter_walker;
 mod line_counter;
+mod line_processor;
 mod result_printer;
 
 #[derive(Debug, Parser)]

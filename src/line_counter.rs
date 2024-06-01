@@ -1,15 +1,17 @@
-use ansi_term::Color::{Blue, White};
 use std::fmt;
 use std::fs::{File, OpenOptions};
-use std::io::{BufRead, BufReader, Error, ErrorKind, Read};
+use std::io::{BufRead, BufReader, Error, Read};
 use std::ops::{Add, AddAssign};
 use std::path::Path;
 
+use ansi_term::Color::{Blue, White};
 use chardet::detect;
 use encoding_rs::{Encoding, UTF_8};
 use encoding_rs_io::DecodeReaderBytesBuilder;
 use humansize::{format_size, WINDOWS};
 use num_format::{Locale, ToFormattedString};
+
+use crate::line_processor::LineProcessorFactory;
 
 #[derive(Clone, Copy, Debug)]
 pub enum LineCountFormat {
@@ -20,6 +22,7 @@ pub enum LineCountFormat {
 #[derive(Clone, Copy, Debug)]
 pub struct LineCount {
     pub lines: u64,
+    pub blank_lines: u64,
     pub bytes: u64,
 }
 
@@ -31,7 +34,11 @@ impl fmt::Display for LineCount {
 
 impl LineCount {
     pub fn new() -> LineCount {
-        LineCount { lines: 0, bytes: 0 }
+        LineCount {
+            lines: 0,
+            blank_lines: 0,
+            bytes: 0,
+        }
     }
 
     fn as_simple(&self, show_bytes: bool) -> String {
@@ -48,10 +55,13 @@ impl LineCount {
         let loc_formatted = self.lines.to_formatted_string(&Locale::en);
         if show_bytes {
             let bytes_formatted = format_size(self.bytes, WINDOWS);
+            let blank_formatted = self.blank_lines.to_formatted_string(&Locale::en);
             format!(
-                "{} {}",
+                "{} {}{} {}",
                 Blue.paint(loc_formatted),
-                White.dimmed().paint(bytes_formatted)
+                White.dimmed().paint(blank_formatted),
+                White.dimmed().paint(" blank"),
+                White.dimmed().paint(bytes_formatted),
             )
         } else {
             loc_formatted
@@ -72,6 +82,7 @@ impl Add for LineCount {
     fn add(self, rhs: Self) -> Self::Output {
         LineCount {
             lines: self.lines + rhs.lines,
+            blank_lines: self.blank_lines + rhs.blank_lines,
             bytes: self.bytes + rhs.bytes,
         }
     }
@@ -80,6 +91,7 @@ impl Add for LineCount {
 impl AddAssign for LineCount {
     fn add_assign(&mut self, rhs: Self) {
         self.lines += rhs.lines;
+        self.blank_lines += rhs.blank_lines;
         self.bytes += rhs.bytes;
     }
 }
@@ -87,31 +99,24 @@ impl AddAssign for LineCount {
 pub fn count_lines(file: &Path, encoding: &'static Encoding) -> Result<LineCount, Error> {
     match File::open(file) {
         Ok(fp) => {
+            let mut line_processor = LineProcessorFactory::create(file.file_name().unwrap());
             let bytes = fp.metadata().unwrap().len();
             let reader = BufReader::new(
                 DecodeReaderBytesBuilder::new()
                     .encoding(Some(encoding))
                     .build(fp),
             );
-            let mut count = 0;
+            let mut count = LineCount::new();
+            count.bytes = bytes;
             for line_result in reader.lines() {
                 match line_result {
                     Ok(line) => {
-                        if line.contains('\u{FFFD}') {
-                            return Err(Error::new(
-                                ErrorKind::InvalidData,
-                                format!("Line count failed whilst using encoding {encoding:?}"),
-                            ));
-                        }
-                        count += 1
+                        count += line_processor.process_line(&line, encoding)?
                     }
                     Err(err) => return Err(err),
                 }
             }
-            Ok(LineCount {
-                lines: count,
-                bytes,
-            })
+            Ok(count)
         }
         Err(err) => Err(err),
     }

@@ -6,7 +6,7 @@ Command Synopsis
 lnav [options] [path1] [path2]...
 ```
 
-If no paths are provided to the command counts lines in the current directory.
+If no paths are provided to the command, it counts lines in the current directory.
 
 ## Available options
 

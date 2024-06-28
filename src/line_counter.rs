@@ -32,6 +32,12 @@ impl fmt::Display for LineCount {
     }
 }
 
+impl Default for LineCount {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl LineCount {
     pub fn new() -> LineCount {
         LineCount {
@@ -96,6 +102,14 @@ impl AddAssign for LineCount {
     }
 }
 
+impl AddAssign<LineCount> for &mut LineCount {
+    fn add_assign(&mut self, rhs: LineCount) {
+        self.lines += rhs.lines;
+        self.blank_lines += rhs.blank_lines;
+        self.bytes += rhs.bytes;
+    }
+}
+
 pub fn count_lines(file: &Path, encoding: &'static Encoding) -> Result<LineCount, Error> {
     match File::open(file) {
         Ok(fp) => {
@@ -110,9 +124,7 @@ pub fn count_lines(file: &Path, encoding: &'static Encoding) -> Result<LineCount
             count.bytes = bytes;
             for line_result in reader.lines() {
                 match line_result {
-                    Ok(line) => {
-                        count += line_processor.process_line(&line, encoding)?
-                    }
+                    Ok(line) => count += line_processor.process_line(&line, encoding)?,
                     Err(err) => return Err(err),
                 }
             }

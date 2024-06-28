@@ -14,11 +14,15 @@ use crate::result_printer::noop_result_printer::NoopResultPrinter;
 use crate::result_printer::simple_result_printer::SimpleResultPrinter;
 use crate::result_printer::verbose_result_printer::VerboseResultPrinter;
 use crate::result_printer::{FinalDisplayOptions, PrinterEntry, ResultPrinter};
+use crate::summarizer::default_summarizer::DefaultSummarizer;
+use crate::summarizer::noop_summarizer::NoopSummarizer;
+use crate::summarizer::Summarizer;
 
 mod counter_walker;
 mod line_counter;
 mod line_processor;
 mod result_printer;
+mod summarizer;
 
 #[derive(Debug, Parser)]
 #[command(name = "CMDStore")]
@@ -51,6 +55,9 @@ struct LineNavArgs {
     #[clap(long, short = 'x', num_args = 1.., required = false)]
     /// Excluded file names
     exclude: Vec<String>,
+    #[clap(long, short = 'm', default_missing_value = "0", num_args = 0..)]
+    /// Summarize line counts by file extension
+    summary: Option<u32>,
 }
 
 fn main() {
@@ -112,6 +119,12 @@ fn main() {
 
     (*printer_impl).set_options(&display_options);
 
+    let mut summarizer: Box<dyn Summarizer> = if args.summary.is_some() {
+        Box::new(DefaultSummarizer::new())
+    } else {
+        Box::new(NoopSummarizer::new())
+    };
+
     let mut final_res = WalkPathResult::new();
     let start = Instant::now();
 
@@ -123,6 +136,7 @@ fn main() {
                     encoding,
                     0,
                     &*printer_impl,
+                    &mut *summarizer,
                     &ExcludeOptions {
                         include_extensions: &include_extensions,
                         exclude: &exclude,
@@ -134,6 +148,7 @@ fn main() {
                     path,
                     encoding,
                     &*printer_impl,
+                    &mut *summarizer,
                     &ExcludeOptions {
                         include_extensions: &include_extensions,
                         exclude: &exclude,
@@ -154,6 +169,7 @@ fn main() {
                 0,
                 res,
                 &NoopResultPrinter {},
+                &mut *summarizer,
             )
             .expect("Count failed");
             printer_impl.print_header(path, 1);
@@ -164,4 +180,8 @@ fn main() {
 
     let duration = start.elapsed();
     printer_impl.print_result(final_res, &duration);
+    if args.summary.is_some() {
+        summarizer.set_limit(args.summary.unwrap());
+        summarizer.print_summary();
+    }
 }

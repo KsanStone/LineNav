@@ -48,7 +48,7 @@ lnav --file-extensions java,cpp,py
 
 Will only search through `*.{java,cpp,py}`.
 
-### --simple [-s]
+### --simple \[-s]
 
 When in combination with verbose mode, it simplifies its output by not printing the file tree. Instead, each file is
 printed along with its file path and line count.
@@ -58,3 +58,8 @@ printed along with its file path and line count.
 /file2.txt : 10
 Total: 810
 ```
+
+### --summary \[limit] \[-m]
+
+Summarize the line count based on the file extension.
+The optional limit will limit the result to the top n positions.

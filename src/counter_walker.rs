@@ -2,6 +2,7 @@ pub mod walk_path_result;
 
 use crate::line_counter::{count_lines, detect_encoding};
 use crate::result_printer::{PrinterEntry, ResultPrinter};
+use crate::summarizer::Summarizer;
 use encoding_rs::Encoding;
 use std::collections::HashSet;
 use std::io::Error;
@@ -21,6 +22,7 @@ pub fn handle_file_entry(
     depth: i32,
     walk_result: &mut WalkPathResult,
     printer: &(impl ResultPrinter + ?Sized),
+    summarizer: &mut (impl Summarizer + ?Sized),
 ) -> Result<(), Error> {
     let mut confidence = -1f32;
     let used_encoding: &'static Encoding = match encoding {
@@ -45,6 +47,7 @@ pub fn handle_file_entry(
                 printer.print_file(entry, lines, -1, used_encoding, depth, confidence);
                 walk_result.file_count += 1;
             };
+            summarizer.append_entry(entry_path, lines);
             Ok(())
         }
         Err(_) => {
@@ -60,6 +63,7 @@ pub fn walk_path(
     encoding: Option<&'static Encoding>,
     depth: i32,
     printer: &(impl ResultPrinter + ?Sized),
+    summarizer: &mut (impl Summarizer + ?Sized),
     exclude_options: &ExcludeOptions,
 ) -> Result<WalkPathResult, Error> {
     let mut walk_result = WalkPathResult::new();
@@ -109,9 +113,17 @@ pub fn walk_path(
                             depth,
                             &mut walk_result,
                             printer,
+                            summarizer,
                         )?
                     } else {
-                        match walk_path(entry_path, encoding, depth + 1, printer, exclude_options) {
+                        match walk_path(
+                            entry_path,
+                            encoding,
+                            depth + 1,
+                            printer,
+                            summarizer,
+                            exclude_options,
+                        ) {
                             Ok(sub_res) => {
                                 printer.print_folder_total(sub_res.line_count, depth + 1);
                                 walk_result += sub_res;
@@ -132,6 +144,7 @@ pub fn simple_walk_path(
     path: &Path,
     encoding: Option<&'static Encoding>,
     printer: &(impl ResultPrinter + ?Sized),
+    summarizer: &mut (impl Summarizer + ?Sized),
     exclude_options: &ExcludeOptions,
 ) -> Result<WalkPathResult, Error> {
     let mut walk_result = WalkPathResult::new();
@@ -177,6 +190,7 @@ pub fn simple_walk_path(
                             -1,
                             &mut walk_result,
                             printer,
+                            summarizer,
                         )?
                     } else {
                         walk_result.folder_count += 1;

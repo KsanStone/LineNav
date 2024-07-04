@@ -9,5 +9,5 @@ pub trait Summarizer {
 
     fn set_limit(&mut self, limit: u32);
 
-    fn print_summary(&self);
+    fn print_summary(&self, total: LineCount);
 }

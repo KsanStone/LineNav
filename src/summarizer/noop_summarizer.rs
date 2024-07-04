@@ -15,5 +15,5 @@ impl Summarizer for NoopSummarizer {
 
     fn set_limit(&mut self, _limit: u32) {}
 
-    fn print_summary(&self) {}
+    fn print_summary(&self, _final_count: LineCount) {}
 }

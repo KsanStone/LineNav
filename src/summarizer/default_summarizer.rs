@@ -45,18 +45,22 @@ impl Summarizer for DefaultSummarizer {
         self.limit = limit
     }
 
-    fn print_summary(&self) {
+    fn print_summary(&self, total: LineCount) {
         let mut entries: Vec<(String, LineCount)> = self.results.clone().into_iter().collect();
         entries.sort_by(|a, b| b.1.lines.cmp(&a.1.lines));
 
         let mut table = Table::new();
-        table.set_titles(row!["extension", "lines", "blank", "size"]);
+        table.set_titles(row!["extension", "% total", "lines", "blank", "size"]);
 
         let mut limit = 0u32;
         for entry in &entries {
             let bytes_formatted = format_size(entry.1.bytes, WINDOWS);
             table.add_row(row![
                 entry.0,
+                format!(
+                    "{:.3}%",
+                    (entry.1.lines as f64) / (total.lines as f64) * 100f64
+                ),
                 entry.1.lines.to_formatted_string(&Locale::en_GB),
                 entry.1.blank_lines.to_formatted_string(&Locale::en_GB),
                 bytes_formatted

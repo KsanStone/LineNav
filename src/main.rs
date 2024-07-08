@@ -179,9 +179,11 @@ fn main() {
     }
 
     let duration = start.elapsed();
-    printer_impl.print_result(final_res, &duration);
+
     if args.summary.is_some() {
         summarizer.set_limit(args.summary.unwrap());
         summarizer.print_summary(final_res.line_count);
     }
+
+    printer_impl.print_result(final_res, &duration);
 }

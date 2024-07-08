@@ -71,6 +71,8 @@ impl Summarizer for DefaultSummarizer {
             }
         }
 
+        println!(); // Pretty padding
+
         table.set_format(*format::consts::FORMAT_CLEAN);
         table.printstd();
 
@@ -83,5 +85,7 @@ impl Summarizer for DefaultSummarizer {
                 ))
             );
         }
+
+        println!(); // Pretty padding
     }
 }

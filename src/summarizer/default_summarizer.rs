@@ -48,25 +48,30 @@ impl Summarizer for DefaultSummarizer {
     }
 
     fn print_summary(&self, total: LineCount) {
-        let mut entries: Vec<(String, (LineCount, u64))> = self.results.clone().into_iter().collect();
-        entries.sort_by(|a, b| b.1.0.lines.cmp(&a.1.0.lines));
+        let mut entries: Vec<(String, (LineCount, u64))> =
+            self.results.clone().into_iter().collect();
+        entries.sort_by(|a, b| b.1 .0.lines.cmp(&a.1 .0.lines));
 
         let mut table = Table::new();
-        table.set_titles(row!["extension", "% total", "lines", "blank", "size", "entries"]);
+        table.set_titles(row!["type", "% total", "lines", "blank", "size", "entries"]);
 
         let mut limit = 0u32;
         for entry in &entries {
-            let bytes_formatted = format_size(entry.1.0.bytes, WINDOWS);
+            let bytes_formatted = format_size(entry.1 .0.bytes, WINDOWS);
             table.add_row(row![
                 entry.0,
                 format!(
                     "{:.3}%",
-                    (entry.1.0.lines as f64) / (total.lines as f64) * 100f64
+                    (entry.1 .0.lines as f64) / (total.lines as f64) * 100f64
                 ),
-                entry.1.0.lines.to_formatted_string(&Locale::en_GB),
-                entry.1.0.blank_lines.to_formatted_string(&Locale::en_GB),
+                entry.1 .0.lines.to_formatted_string(&Locale::en_GB),
+                format!(
+                    "{} ({:.0}%)",
+                    entry.1 .0.blank_lines.to_formatted_string(&Locale::en_GB),
+                    (entry.1 .0.blank_lines as f64) / (entry.1 .0.lines as f64) * 100.0
+                ),
                 bytes_formatted,
-                entry.1.1
+                entry.1 .1
             ]);
             limit += 1;
             if limit == self.limit {

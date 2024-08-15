@@ -15,6 +15,7 @@ use crate::result_printer::simple_result_printer::SimpleResultPrinter;
 use crate::result_printer::verbose_result_printer::VerboseResultPrinter;
 use crate::result_printer::{FinalDisplayOptions, PrinterEntry, ResultPrinter};
 use crate::summarizer::default_summarizer::DefaultSummarizer;
+use crate::summarizer::leaderboard_summarizer::LeaderboardSummarizer;
 use crate::summarizer::noop_summarizer::NoopSummarizer;
 use crate::summarizer::Summarizer;
 
@@ -58,6 +59,9 @@ struct LineNavArgs {
     #[clap(long, short = 'm', default_missing_value = "0", num_args = 0..)]
     /// Summarize line counts by file extension
     summary: Option<u32>,
+    /// Display a leaderboard of longest files
+    #[clap(long, short, action)]
+    leaderboard: bool,
 }
 
 fn main() {
@@ -121,6 +125,8 @@ fn main() {
 
     let mut summarizer: Box<dyn Summarizer> = if args.summary.is_some() {
         Box::new(DefaultSummarizer::new())
+    } else if args.leaderboard {
+        Box::new(LeaderboardSummarizer::new())
     } else {
         Box::new(NoopSummarizer::new())
     };
@@ -182,6 +188,8 @@ fn main() {
 
     if args.summary.is_some() {
         summarizer.set_limit(args.summary.unwrap());
+        summarizer.print_summary(final_res.line_count);
+    } else if args.leaderboard {
         summarizer.print_summary(final_res.line_count);
     }
 

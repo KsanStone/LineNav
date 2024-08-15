@@ -1,4 +1,5 @@
 pub mod default_summarizer;
+pub mod leaderboard_summarizer;
 pub mod noop_summarizer;
 
 use crate::line_counter::LineCount;
@@ -9,5 +10,5 @@ pub trait Summarizer {
 
     fn set_limit(&mut self, limit: u32);
 
-    fn print_summary(&self, total: LineCount);
+    fn print_summary(&mut self, total: LineCount);
 }

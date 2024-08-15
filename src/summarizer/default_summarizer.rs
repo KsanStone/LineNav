@@ -47,7 +47,7 @@ impl Summarizer for DefaultSummarizer {
         self.limit = limit
     }
 
-    fn print_summary(&self, total: LineCount) {
+    fn print_summary(&mut self, total: LineCount) {
         let mut entries: Vec<(String, (LineCount, u64))> =
             self.results.clone().into_iter().collect();
         entries.sort_by(|a, b| b.1 .0.lines.cmp(&a.1 .0.lines));

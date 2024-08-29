@@ -63,3 +63,7 @@ Total: 810
 
 Summarize the line count based on the file extension.
 The optional limit will limit the result to the top n positions.
+
+### --leaderboard \[-l]
+
+Leaderboard of longest files.

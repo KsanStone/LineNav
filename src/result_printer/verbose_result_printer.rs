@@ -29,7 +29,7 @@ impl VerboseResultPrinter {
     }
 }
 
-fn pad_ended(depth: i32, end: &String) -> ANSIGenericString<str> {
+fn pad_ended(depth: i32, end: &str) -> ANSIGenericString<str> {
     White
         .dimmed()
         .paint("│ ".repeat(max(depth, 0) as usize) + end)
@@ -75,7 +75,7 @@ impl ResultPrinter for VerboseResultPrinter {
     fn print_folder_total(&self, total: LineCount, depth: i32) {
         println!(
             "{} {}",
-            pad_ended(depth, &"└".to_string()),
+            pad_ended(depth, "└"),
             total.as_fmt_string(&self.options.line_count_format)
         );
     }
@@ -91,7 +91,7 @@ impl ResultPrinter for VerboseResultPrinter {
     fn print_folder(&self, entry: &PrinterEntry, num_entries: usize, depth: i32) {
         println!(
             "{}{} :: {}",
-            pad_ended(depth, &"├".to_string()),
+            pad_ended(depth, "├"),
             Purple.paint(&entry.name),
             Yellow.paint(num_entries.to_formatted_string(&Locale::en_GB))
         )
@@ -121,7 +121,7 @@ impl ResultPrinter for VerboseResultPrinter {
         };
         println!(
             "{}{} :: {}{}",
-            pad_ended(depth, &"├".to_string()),
+            pad_ended(depth, "├"),
             Green.paint(&entry.name),
             lines.as_fmt_string(&self.options.line_count_format),
             White.dimmed().paint(verbose_info)
@@ -139,7 +139,7 @@ impl ResultPrinter for VerboseResultPrinter {
         if self.options.show_all {
             println!(
                 "{}{} :: {}",
-                pad_ended(depth, &"├".to_string()),
+                pad_ended(depth, "├"),
                 Green.paint(&entry.name),
                 White.dimmed().paint("EMPTY")
             );
@@ -157,7 +157,7 @@ impl ResultPrinter for VerboseResultPrinter {
         if self.options.show_all {
             println!(
                 "{}{} :: {}",
-                pad_ended(depth, &"├".to_string()),
+                pad_ended(depth, "├"),
                 Green.paint(&entry.name),
                 Red.paint("ERROR")
             );

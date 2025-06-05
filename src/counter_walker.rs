@@ -6,7 +6,7 @@ use crate::summarizer::Summarizer;
 use encoding_rs::Encoding;
 use std::collections::HashSet;
 use std::io::Error;
-use std::path::Path;
+use std::path::{Component, Path};
 use walk_path_result::WalkPathResult;
 use walkdir::WalkDir;
 
@@ -31,7 +31,7 @@ pub fn handle_file_entry(
             if detected.is_err() {
                 return Err(detected.err().unwrap());
             }
-            let detected_encoding = detected.unwrap();
+            let detected_encoding = detected?;
             confidence = detected_encoding.confidence;
             detected_encoding.encoding
         }
@@ -174,8 +174,18 @@ pub fn simple_walk_path(
                         .unwrap(),
                     path: entry_path,
                 };
+                let mut is_excluded = false;
+                let components: Vec<Component> = entry_path.components().collect();
+                for i in 0..dir_entry.depth() {
+                    if let Component::Normal(name) = components[components.len() - i - 1] {
+                        if exclude_options.exclude.contains(name.to_str().unwrap()) {
+                            is_excluded = true;
+                            break;
+                        }
+                    }
+                }
 
-                if (skip_name_check || !exclude_options.exclude.contains(&*entry.name))
+                if (skip_name_check || !is_excluded)
                     && (file_ext.is_none()
                         || skip_ext_check
                         || exclude_options

@@ -15,7 +15,7 @@ impl ResultPrinter for NoopResultPrinter {
     }
 
     fn print_subtotal(&self, total: LineCount) {
-        println!(": {}", total);
+        println!(": {total}");
     }
 
     fn print_folder_total(&self, _total: LineCount, _depth: i32) {}

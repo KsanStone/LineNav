@@ -51,7 +51,7 @@ impl LineCount {
         let loc_formatted = self.lines.to_string();
         if show_bytes {
             let bytes_formatted = format_size(self.bytes, WINDOWS);
-            format!("{}loc {}", loc_formatted, bytes_formatted)
+            format!("{loc_formatted}loc {bytes_formatted}")
         } else {
             loc_formatted
         }

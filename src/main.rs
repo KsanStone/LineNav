@@ -9,6 +9,7 @@ use encoding_rs::Encoding;
 use crate::counter_walker::walk_path_result::WalkPathResult;
 use crate::counter_walker::{handle_file_entry, simple_walk_path, walk_path, ExcludeOptions};
 use crate::line_counter::LineCountFormat;
+#[cfg(debug_assertions)]
 use crate::result_printer::debug_result_printer::DebugResultPrinter;
 use crate::result_printer::noop_result_printer::NoopResultPrinter;
 use crate::result_printer::simple_result_printer::SimpleResultPrinter;
@@ -43,6 +44,7 @@ struct LineNavArgs {
     /// Simplified console output
     simple: bool,
     #[clap(long, short, action)]
+    #[cfg(debug_assertions)]
     debug: bool,
     #[clap(long, short, default_value = "UTF-8")]
     /// Encoding to read files with. Set "auto" to automatically detect
@@ -115,10 +117,15 @@ fn main() {
             Box::new(SimpleResultPrinter::new())
         } else if display_options.verbose {
             Box::new(VerboseResultPrinter::new())
-        } else if args.debug {
-            Box::new(DebugResultPrinter {})
         } else {
-            Box::new(NoopResultPrinter {})
+            #[cfg(debug_assertions)]
+            if args.debug {
+                Box::new(DebugResultPrinter {})
+            } else {
+                Box::new(NoopResultPrinter {})
+            }
+            #[cfg(not(debug_assertions))]
+            Box::new(SimpleResultPrinter::new())
         };
 
     (*printer_impl).set_options(&display_options);

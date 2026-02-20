@@ -29,7 +29,7 @@ impl VerboseResultPrinter {
     }
 }
 
-fn pad_ended(depth: i32, end: &str) -> ANSIGenericString<str> {
+fn pad_ended(depth: i32, end: &str) -> ANSIGenericString<'_, str> {
     White
         .dimmed()
         .paint("│ ".repeat(max(depth, 0) as usize) + end)

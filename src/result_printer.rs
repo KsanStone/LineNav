@@ -25,7 +25,7 @@ pub struct PrinterEntry<'a> {
 }
 
 impl PrinterEntry<'_> {
-    pub fn from_path(path: &Path) -> PrinterEntry {
+    pub fn from_path(path: &Path) -> PrinterEntry<'_> {
         let name = path
             .file_name()
             .unwrap()
